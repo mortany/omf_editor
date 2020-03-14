@@ -11,19 +11,14 @@ namespace OMF_Editor
     {
         public void WriteOMF(BinaryWriter writer, AnimationsContainer omf_file)
         {
-            writer.Write(omf_file.SectionId);
-            writer.Write(omf_file.SectionSize);
-            writer.Write(omf_file.SectionId2);
-            writer.Write(omf_file.SectionSize2);
-            writer.Write(omf_file.AnimsCount);
+            omf_file.WriteAnimationContainer(writer, this);
 
-            foreach (AnimVector anim in omf_file.Anims)
-            {
-                writer.Write(anim.SectionId);
-                writer.Write(anim.SectionSize);
-                WriteSuperString(writer, anim.Name);
-                writer.Write(anim.data);
-            }
+            omf_file.bone_cont.WriteBoneCont(writer, this);
+
+            writer.Write(omf_file.AnimsParamsCount);
+
+            foreach (AnimationParams anim_param in omf_file.AnimsParams)
+                anim_param.WriteAnimationParams(writer, this, omf_file.bone_cont.OGF_V);
         }
 
         public bool OpenOMF(string filename, List<AnimationsContainer> OMFFiles)
@@ -38,7 +33,11 @@ namespace OMF_Editor
                 //Проверка
                 if (AnimCont.AnimsCount != AnimCont.AnimsParamsCount) return false;
 
-                
+                for(int i = 0; i < AnimCont.AnimsParamsCount; i++)
+                {
+                    AnimationParams anm_p = new AnimationParams(reader, this, AnimCont.bone_cont.OGF_V);
+                    AnimCont.AddAnimParams(anm_p);
+                }
 
                 OMFFiles.Add(AnimCont);
 
@@ -75,6 +74,13 @@ namespace OMF_Editor
         {
             writer.Write(text.ToCharArray());
             writer.Write((byte)0);
+        }
+
+        public void WriteMarkString(BinaryWriter writer, string text)
+        {
+            writer.Write(text.ToCharArray());
+            writer.Write((byte)0x0D);
+            writer.Write((byte)0x0A);
         }
     }
 }

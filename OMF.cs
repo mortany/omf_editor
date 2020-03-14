@@ -63,6 +63,25 @@ namespace OMF_Editor
                 AddAnim(vector);
             }
         }
+
+        public void WriteAnimationContainer(BinaryWriter writer, OMFEditor editor)
+        {
+            writer.Write(SectionId);
+            writer.Write(SectionSize);
+
+            writer.Write(SectionId2);
+            writer.Write(SectionSize2);
+
+            writer.Write(AnimsCount);
+
+            foreach (AnimVector anim in Anims)
+            {
+                writer.Write(anim.SectionId);
+                writer.Write(anim.SectionSize);
+                editor.WriteSuperString(writer, anim.Name);
+                writer.Write(anim.data);
+            }
+        }
     }
 
     public class AnimVector
@@ -129,6 +148,69 @@ namespace OMF_Editor
                 parts.Add(bonesparts);
             }
         }
+
+        public void WriteBoneCont(BinaryWriter writer, OMFEditor editor)
+        {
+            writer.Write(SectionId);
+            writer.Write(SectionSize);
+            writer.Write(OGF_V);
+            writer.Write(Count);
+
+            foreach (BoneParts bone in parts)
+            {
+                editor.WriteSuperString(writer, bone.Name);
+                writer.Write(bone.Count);
+
+                foreach (BoneVector sbone in bone.bones)
+                {
+                    editor.WriteSuperString(writer, sbone.Name);
+                    writer.Write(sbone.ID);
+                }
+            }
+        }
+    }
+
+    public class MotionMark
+    {
+        public string Name;
+        public int    Count;
+
+        public List<MotionMarkParams> m_params = new List<MotionMarkParams>();
+
+        public MotionMark(BinaryReader reader, OMFEditor editor)
+        {
+            Name = editor.ReadSuperString(reader);
+            Count = reader.ReadInt32();
+
+            for (int n = 0; n < Count; n++)
+            {
+                MotionMarkParams param = new MotionMarkParams(reader);
+                m_params.Add(param);
+            }
+        }
+
+        public void WriteMotionMark(BinaryWriter writer, OMFEditor editor)
+        {
+            editor.WriteMarkString(writer, Name);
+            writer.Write(Count);
+
+            foreach(MotionMarkParams param in m_params)
+            {
+                writer.Write(param.t0);
+                writer.Write(param.t1);
+            }
+        }
+    }
+
+    public class MotionMarkParams
+    {
+        public float t0;
+        public float t1;
+        public MotionMarkParams(BinaryReader reader)
+        {
+            t0 = reader.ReadSingle();
+            t1 = reader.ReadSingle();
+        }
     }
 
     public class AnimationParams
@@ -155,53 +237,47 @@ namespace OMF_Editor
             Power = reader.ReadSingle();
             Accrue = reader.ReadSingle();
             Falloff = reader.ReadSingle();
+            MarksCount = 0;
 
-            if(motion_version == 4)
+            if (motion_version == 4)
             {
                 MarksCount = reader.ReadInt32();
 
-                if(MarksCount > 0)
+                if (MarksCount > 0)
                 {
                     m_marks = new List<MotionMark>();
 
                     for (int i = 0; i < MarksCount; i++)
                     {
-                        MotionMark newmark = new MotionMark();
-
-                        newmark.Name = editor.ReadSuperString(reader);
-                        newmark.Count = reader.ReadInt32();
-
-                        for (int n = 0; n < newmark.Count; n++)
-                        {
-                            MotionMarkParams param = new MotionMarkParams();
-                            param.t0 = reader.ReadSingle();
-                            param.t1 = reader.ReadSingle();
-                            newmark.m_params.Add(param);
-                        }
-
+                        MotionMark newmark = new MotionMark(reader, editor);
                         m_marks.Add(newmark);
                     }
                 }
             }
-            else
+        }
+
+        public void WriteAnimationParams(BinaryWriter writer, OMFEditor editor, short motion_version)
+        {
+            editor.WriteSuperString(writer, Name);
+            writer.Write(Flags);
+            writer.Write(BoneOrPart);
+            writer.Write(MotionID);
+            writer.Write(Speed);
+            writer.Write(Power);
+            writer.Write(Accrue);
+            writer.Write(Falloff);
+
+            if (motion_version != 4) return;
+
+            writer.Write(MarksCount);
+
+            if(MarksCount != 0 && m_marks != null)
             {
-                MarksCount = -1;
+                foreach (MotionMark mark in m_marks)
+                    mark.WriteMotionMark(writer, editor);
             }
 
         }
-    }
 
-    public class MotionMark
-    {
-        public string Name;
-        public int    Count;
-
-        public List<MotionMarkParams> m_params = new List<MotionMarkParams>();
-    }
-
-    public class MotionMarkParams
-    {
-        public float t0;
-        public float t1;
     }
 }
