@@ -18,6 +18,18 @@ namespace OMF_Editor
         public List<AnimVector> Anims = new List<AnimVector>();
         public List<AnimationParams> AnimsParams = new List<AnimationParams>();
 
+        public void RecalcSectionSize()
+        {
+            uint new_size = 0;
+            foreach(AnimVector anim in Anims)
+            {
+                anim.RecalcSectionSize();
+                new_size += anim.GetSize();
+            }
+            new_size += 12;
+            SectionSize = new_size;
+        }
+
         public BoneContainer bone_cont;
 
         public void AddAnim(AnimVector vector)
@@ -90,6 +102,16 @@ namespace OMF_Editor
         public uint   SectionSize;
         public string Name;
         public byte[] data;
+
+        public uint GetSize()
+        {
+            return SectionSize + 8;
+        }
+
+        public void RecalcSectionSize()
+        {
+            SectionSize = (uint)(Name.Length + 1 + data.Length);
+        }
 
         public string MotionName
         {
@@ -215,15 +237,15 @@ namespace OMF_Editor
 
     public class AnimationParams
     {
-        public string Name;
-        public int Flags;
-        public short BoneOrPart;
-        public short MotionID;
-        public float Speed;
-        public float Power;
-        public float Accrue;
-        public float Falloff;
-        public int MarksCount;
+        public string Name { get; set; }
+        public int Flags { get; set; }
+        public short BoneOrPart { get; set; }
+        public short MotionID { get; set; }
+        public float Speed { get; set; }
+        public float Power { get; set; }
+        public float Accrue { get; set; }
+        public float Falloff { get; set; }
+        public int MarksCount { get; set; }
 
         public List<MotionMark> m_marks; // = new List<MotionMark>();
 

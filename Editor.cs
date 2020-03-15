@@ -11,6 +11,9 @@ namespace OMF_Editor
     {
         public void WriteOMF(BinaryWriter writer, AnimationsContainer omf_file)
         {
+
+            omf_file.RecalcSectionSize();
+
             omf_file.WriteAnimationContainer(writer, this);
 
             omf_file.bone_cont.WriteBoneCont(writer, this);
