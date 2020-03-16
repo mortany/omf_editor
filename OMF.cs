@@ -30,6 +30,22 @@ namespace OMF_Editor
             SectionSize = new_size;
         }
 
+        public void RecalcAnimNum()
+        {
+            AnimsCount = AnimsParams.Count;
+            AnimsParamsCount = (short)AnimsParams.Count;
+        }
+
+        public void RecalcAllAnimIndex()
+        {
+            short i = 0;
+            foreach(AnimationParams anm in AnimsParams)
+            {
+                anm.MotionID = i;
+                i++;
+            }
+        }
+
         public BoneContainer bone_cont;
 
         public void AddAnim(AnimVector vector)

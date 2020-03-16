@@ -9,6 +9,36 @@ namespace OMF_Editor
 {
     public class OMFEditor
     {
+
+        public void CopyAnims(AnimationsContainer omf_1, AnimationsContainer omf_2)
+        {
+            //bool omf_1.bone_cont.OGF_V != omf_2.bone_cont.OGF_V
+            omf_1.RecalcAnimNum();
+
+            foreach (AnimVector anim in omf_2.Anims)
+            {
+                omf_1.AddAnim(anim);
+            }
+
+            short b = (short)omf_1.AnimsCount;
+            foreach (AnimationParams anim_param in omf_2.AnimsParams)
+            {
+                anim_param.MotionID = b;
+
+                if((omf_1.bone_cont.OGF_V != omf_2.bone_cont.OGF_V) && omf_1.bone_cont.OGF_V == 3)
+                {
+                    anim_param.MarksCount = 0; 
+                    anim_param.m_marks = null;
+                }
+
+                omf_1.AddAnimParams(anim_param);
+                b++;
+            }
+
+            omf_1.RecalcAnimNum();
+        }
+
+
         public void WriteOMF(BinaryWriter writer, AnimationsContainer omf_file)
         {
 
@@ -24,29 +54,62 @@ namespace OMF_Editor
                 anim_param.WriteAnimationParams(writer, this, omf_file.bone_cont.OGF_V);
         }
 
-        public bool OpenOMF(string filename, List<AnimationsContainer> OMFFiles)
+        public AnimationsContainer OpenOMF(string filename)
         {
             using (BinaryReader reader = new BinaryReader(File.Open(filename, FileMode.Open)))
             {
-                AnimationsContainer AnimCont = new AnimationsContainer(reader, this);
+                AnimationsContainer omf_file = new AnimationsContainer(reader, this);
                 //Загрузка костей
-                AnimCont.bone_cont = new BoneContainer(reader, this);
-
-                AnimCont.AnimsParamsCount = reader.ReadInt16();
+                omf_file.bone_cont = new BoneContainer(reader, this);
+                //Загрузка параметров анимаций
+                omf_file.AnimsParamsCount = reader.ReadInt16();
                 //Проверка
-                if (AnimCont.AnimsCount != AnimCont.AnimsParamsCount) return false;
+                if (omf_file.AnimsCount != omf_file.AnimsParamsCount) return null;
 
-                for(int i = 0; i < AnimCont.AnimsParamsCount; i++)
+                for(int i = 0; i < omf_file.AnimsParamsCount; i++)
                 {
-                    AnimationParams anm_p = new AnimationParams(reader, this, AnimCont.bone_cont.OGF_V);
-                    AnimCont.AddAnimParams(anm_p);
+                    AnimationParams anm_p = new AnimationParams(reader, this, omf_file.bone_cont.OGF_V);
+                    omf_file.AddAnimParams(anm_p);
                 }
 
-                OMFFiles.Add(AnimCont);
-
-                return true;
+                return omf_file;
             }
             
+        }
+
+        public int CompareOMF(AnimationsContainer omf_1, AnimationsContainer omf_2)
+        {
+            int error_v = 0;
+
+            if (omf_1.bone_cont.Count != omf_2.bone_cont.Count)
+            {
+                return error_v = 1;
+            }
+            else
+            {
+                for (int i = 0; i < omf_1.bone_cont.Count; i++)
+                {
+                    if (omf_1.bone_cont.parts[i].Count != omf_2.bone_cont.parts[i].Count)
+                    {
+                        return error_v = 1;
+                    }
+                    else
+                    {
+                        for (int b = 0; b < omf_1.bone_cont.parts[i].Count; b++)
+                        {
+                            if(omf_1.bone_cont.parts[i].bones[b].Name != omf_2.bone_cont.parts[i].bones[b].Name)
+                                return error_v = 1;
+                        }
+                    }
+                }
+            }
+
+            if (omf_1.bone_cont.OGF_V != omf_2.bone_cont.OGF_V)
+            {
+                return error_v = 2;
+            }
+            else
+                return error_v;
         }
 
         public string ReadSuperString(BinaryReader reader)

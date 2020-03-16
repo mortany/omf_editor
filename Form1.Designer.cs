@@ -28,6 +28,7 @@ namespace OMF_Editor
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.button1 = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -43,7 +44,15 @@ namespace OMF_Editor
             this.label3 = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.button3 = new System.Windows.Forms.Button();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.cloneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // listBox1
@@ -54,12 +63,13 @@ namespace OMF_Editor
             this.listBox1.Size = new System.Drawing.Size(199, 420);
             this.listBox1.TabIndex = 0;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
+            this.listBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listBox1_MouseDown);
             // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(217, 12);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(257, 40);
+            this.button1.Size = new System.Drawing.Size(257, 24);
             this.button1.TabIndex = 1;
             this.button1.Text = "Load OMF";
             this.button1.UseVisualStyleBackColor = true;
@@ -72,9 +82,9 @@ namespace OMF_Editor
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(217, 58);
+            this.button2.Location = new System.Drawing.Point(217, 42);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(257, 40);
+            this.button2.Size = new System.Drawing.Size(257, 24);
             this.button2.TabIndex = 2;
             this.button2.Text = "Save OMF";
             this.button2.UseVisualStyleBackColor = true;
@@ -101,9 +111,9 @@ namespace OMF_Editor
             this.groupBox1.Controls.Add(this.textBox3);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.textBox1);
-            this.groupBox1.Location = new System.Drawing.Point(222, 111);
+            this.groupBox1.Location = new System.Drawing.Point(223, 114);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(251, 320);
+            this.groupBox1.Size = new System.Drawing.Size(251, 216);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             // 
@@ -123,7 +133,7 @@ namespace OMF_Editor
             this.textBox6.Size = new System.Drawing.Size(71, 20);
             this.textBox6.TabIndex = 13;
             this.textBox6.Tag = "Falloff";
-            this.textBox6.TextChanged += new System.EventHandler(this.TextBoxFilterNumber);
+            this.textBox6.TextChanged += new System.EventHandler(this.TextBoxFilter);
             // 
             // label5
             // 
@@ -141,7 +151,7 @@ namespace OMF_Editor
             this.textBox5.Size = new System.Drawing.Size(71, 20);
             this.textBox5.TabIndex = 11;
             this.textBox5.Tag = "Accrue";
-            this.textBox5.TextChanged += new System.EventHandler(this.TextBoxFilterNumber);
+            this.textBox5.TextChanged += new System.EventHandler(this.TextBoxFilter);
             // 
             // label4
             // 
@@ -159,7 +169,7 @@ namespace OMF_Editor
             this.textBox4.Size = new System.Drawing.Size(71, 20);
             this.textBox4.TabIndex = 9;
             this.textBox4.Tag = "Power";
-            this.textBox4.TextChanged += new System.EventHandler(this.TextBoxFilterNumber);
+            this.textBox4.TextChanged += new System.EventHandler(this.TextBoxFilter);
             // 
             // label3
             // 
@@ -177,7 +187,7 @@ namespace OMF_Editor
             this.textBox3.Size = new System.Drawing.Size(71, 20);
             this.textBox3.TabIndex = 7;
             this.textBox3.Tag = "Speed";
-            this.textBox3.TextChanged += new System.EventHandler(this.TextBoxFilterNumber);
+            this.textBox3.TextChanged += new System.EventHandler(this.TextBoxFilter);
             // 
             // textBox1
             // 
@@ -185,13 +195,70 @@ namespace OMF_Editor
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(239, 20);
             this.textBox1.TabIndex = 3;
+            this.textBox1.Tag = "MotionName";
             this.textBox1.TextChanged += new System.EventHandler(this.TextBoxFilter);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Location = new System.Drawing.Point(223, 336);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(251, 96);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(322, 436);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(152, 13);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Forward Frontier Team © 2020";
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(217, 84);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(257, 24);
+            this.button3.TabIndex = 7;
+            this.button3.Text = "Merge with OMF";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // saveFileDialog1
+            // 
+            this.saveFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.saveFileDialog1_FileOk);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cloneToolStripMenuItem,
+            this.deleteToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(108, 48);
+            // 
+            // cloneToolStripMenuItem
+            // 
+            this.cloneToolStripMenuItem.Name = "cloneToolStripMenuItem";
+            this.cloneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.cloneToolStripMenuItem.Text = "Clone";
+            this.cloneToolStripMenuItem.Click += new System.EventHandler(this.cloneToolStripMenuItem_Click);
+            // 
+            // deleteToolStripMenuItem
+            // 
+            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.deleteToolStripMenuItem.Text = "Delete";
+            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(482, 443);
+            this.ClientSize = new System.Drawing.Size(482, 453);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
@@ -199,10 +266,12 @@ namespace OMF_Editor
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "OMF Editor 0.3";
+            this.Text = "OMF Editor 1.0";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -223,6 +292,13 @@ namespace OMF_Editor
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem cloneToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
     }
 }
 
