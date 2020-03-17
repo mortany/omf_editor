@@ -33,6 +33,7 @@ namespace OMF_Editor
             openFileDialog1.Filter = "OMF file|*.omf";
             saveFileDialog1.Filter = "OMF file|*.omf";
 
+            cloneToolStripMenuItem.Enabled = false;
             //contextMenuStrip1.AccessibilityObject = listBox1;
         }
 
@@ -181,11 +182,17 @@ namespace OMF_Editor
             Main_OMF.RecalcAllAnimIndex();
             Main_OMF.RecalcAnimNum();
             UpdateList();
+            if (current_index != 0) listBox1.SelectedIndex = current_index - 1;
+            else listBox1.SelectedIndex = 0;
+
+            current_index = -1;
         }
 
         private void cloneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (current_index == -1) return;
+
+
         }
 
         private void listBox1_MouseDown(object sender, MouseEventArgs e)
@@ -196,6 +203,7 @@ namespace OMF_Editor
             if (index != ListBox.NoMatches)
             {
                 contextMenuStrip1.Show(Cursor.Position);
+                deleteToolStripMenuItem.Enabled = listBox1.Items.Count > 1;
                 contextMenuStrip1.Visible = true;
                 current_index = index;
             }
