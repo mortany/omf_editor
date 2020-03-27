@@ -20,7 +20,17 @@ namespace OMF_Editor
 
         BindingSource bs = new BindingSource();
 
+        int StopAtEnd = 1 << 1;
+        int NoMix = 1 << 2;
+        int SyncPart = 1 << 3;
+        int UseFootSteps = 1 << 4;
+        int MoveXForm = 1 << 5;
+        int Idle = 1 << 6;
+        int UseWeaponBone = 1 << 7;
+
         int current_index = -1;
+
+        List<CheckBox> Boxes = new List<CheckBox>();
 
         public Form1()
         {
@@ -34,7 +44,14 @@ namespace OMF_Editor
             saveFileDialog1.Filter = "OMF file|*.omf";
 
             cloneToolStripMenuItem.Enabled = false;
-            //contextMenuStrip1.AccessibilityObject = listBox1;
+
+            Boxes.Add(checkBox1);
+            Boxes.Add(checkBox2);
+            Boxes.Add(checkBox3);
+            Boxes.Add(checkBox4);
+            Boxes.Add(checkBox5);
+            Boxes.Add(checkBox6);
+            Boxes.Add(checkBox7);
         }
 
         private void OpenFile(string filename)
@@ -139,6 +156,8 @@ namespace OMF_Editor
             textBox4.Text = (listBox1.SelectedItem as AnimationParams).Power.ToString();
             textBox5.Text = (listBox1.SelectedItem as AnimationParams).Accrue.ToString();
             textBox6.Text = (listBox1.SelectedItem as AnimationParams).Falloff.ToString();
+
+            FillFlagsStates();
         }
 
         private void TextBoxFilter(object sender, EventArgs e)
@@ -151,16 +170,18 @@ namespace OMF_Editor
             if (!match.Success) current.Text = current.Text.Remove(current.Text.Length - 1, 1);
             current.SelectionStart = current.Text.Length;
 
-            switch(current.Tag.ToString())
+            AnimationParams CurrentAnim = listBox1.SelectedItem as AnimationParams;
+
+            switch (current.Tag.ToString())
             {
-                case "Speed": (listBox1.SelectedItem as AnimationParams).Speed = Convert.ToSingle(current.Text); break;
-                case "Power": (listBox1.SelectedItem as AnimationParams).Power = Convert.ToSingle(current.Text); break;
-                case "Accrue": (listBox1.SelectedItem as AnimationParams).Accrue = Convert.ToSingle(current.Text); break;
-                case "Falloff": (listBox1.SelectedItem as AnimationParams).Falloff = Convert.ToSingle(current.Text); break;
+                case "Speed": CurrentAnim.Speed = Convert.ToSingle(current.Text); break;
+                case "Power": CurrentAnim.Power = Convert.ToSingle(current.Text); break;
+                case "Accrue": CurrentAnim.Accrue = Convert.ToSingle(current.Text); break;
+                case "Falloff": CurrentAnim.Falloff = Convert.ToSingle(current.Text); break;
                 case "MotionName":
                     {
-                        (listBox1.SelectedItem as AnimationParams).Name = current.Text; 
-                        int index = (listBox1.SelectedItem as AnimationParams).MotionID;
+                        CurrentAnim.Name = current.Text; 
+                        int index = CurrentAnim.MotionID;
                         Main_OMF.Anims[index].Name = current.Text;
                     }break;
                 default: break;
@@ -212,6 +233,46 @@ namespace OMF_Editor
                 contextMenuStrip1.Visible = false;
                 current_index = -1;
             }
+        }
+
+        private void FillFlagsStates()
+        {
+            if (Main_OMF == null) return;
+
+            AnimationParams CurrentAnim = listBox1.SelectedItem as AnimationParams;
+            int Flags = CurrentAnim.Flags;
+
+            for(int i = 1; i < 8;i++)
+            {
+                Boxes[i - 1].Checked = (Flags & (1 << i)) == (1 << i);
+            }
+        }
+
+        private void WriteAllFlags()
+        {
+            if (Main_OMF == null) return;
+            AnimationParams CurrentAnim = listBox1.SelectedItem as AnimationParams;
+
+            for(int i = 1; i < 8;i++)
+            {
+                BitSet(CurrentAnim.Flags, (1 << i), Boxes[i - 1].Checked);
+            }
+        }
+
+        private int BitSet(int flags, int mask,bool bvalue)
+        {
+            if(bvalue)
+                return flags |= mask;
+            else 
+                return flags &= ~mask;
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (Main_OMF == null) return;
+
+            WriteAllFlags();
+            FillFlagsStates();
         }
     }
 }

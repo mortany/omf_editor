@@ -15,6 +15,7 @@ namespace OMF_Editor
         public int AnimsCount;
         public short AnimsParamsCount;
 
+
         public List<AnimVector> Anims = new List<AnimVector>();
         public List<AnimationParams> AnimsParams = new List<AnimationParams>();
 
