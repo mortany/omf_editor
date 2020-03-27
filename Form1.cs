@@ -255,7 +255,7 @@ namespace OMF_Editor
 
             for(int i = 1; i < 8;i++)
             {
-                BitSet(CurrentAnim.Flags, (1 << i), Boxes[i - 1].Checked);
+                CurrentAnim.Flags = BitSet(CurrentAnim.Flags, (1 << i), Boxes[i - 1].Checked);
             }
         }
 
@@ -272,7 +272,6 @@ namespace OMF_Editor
             if (Main_OMF == null) return;
 
             WriteAllFlags();
-            FillFlagsStates();
         }
     }
 }
