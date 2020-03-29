@@ -36,6 +36,7 @@ namespace OMF_Editor
             }
 
             omf_1.RecalcAnimNum();
+            omf_1.RecalcAllAnimIndex();
         }
 
 

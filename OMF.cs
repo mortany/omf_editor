@@ -29,6 +29,17 @@ namespace OMF_Editor
             }
             new_size += 12;
             SectionSize = new_size;
+
+            // Recalc second section size
+            new_size = 2; // motions count ( short )
+
+            foreach (AnimationParams anim in AnimsParams)
+                new_size += (uint)anim.Size(bone_cont.OGF_V);
+
+            new_size += (uint)bone_cont.Size();
+
+            bone_cont.SectionSize = new_size;
+
         }
 
         public void RecalcAnimNum()
@@ -45,7 +56,15 @@ namespace OMF_Editor
                 anm.MotionID = i;
                 i++;
             }
+            i = 1;
+            foreach (AnimVector anm in Anims)
+            {
+                anm.SectionId = i;
+                i++;
+            }
         }
+
+
 
         public BoneContainer bone_cont;
 
@@ -142,12 +161,28 @@ namespace OMF_Editor
         public short Count;
 
         public List<BoneVector> bones = new List<BoneVector>();
+
+        public int Size()
+        {
+            int new_size = 0;
+            foreach(BoneVector bone in bones)
+            {
+                new_size += bone.Size();
+            }
+
+            return new_size + Name.Length + 3;
+        }
     }
 
     public class BoneVector
     {
         public string Name;
         public uint ID;
+
+        public int Size()
+        {
+            return Name.Length + 5;
+        }
     }
 
     public class BoneContainer
@@ -156,6 +191,17 @@ namespace OMF_Editor
         public uint SectionSize;
         public short OGF_V;
         public short Count;
+
+        public int Size()
+        {
+            int new_size = 0;
+            foreach(BoneParts bonesparts in parts)
+            {
+                new_size += bonesparts.Size();
+            }
+
+            return new_size + 4;
+        }
 
         public List<BoneParts> parts = new List<BoneParts>();
 
@@ -263,6 +309,18 @@ namespace OMF_Editor
         public float Accrue { get; set; }
         public float Falloff { get; set; }
         public int MarksCount { get; set; }
+
+        public int Size(short motion_version)
+        {
+            int new_size = 0;
+
+            if(motion_version == 4)
+            {
+                new_size += (8 * MarksCount) + 4;
+            }
+
+            return new_size + Name.Length + 25;
+        }
 
         public List<MotionMark> m_marks; // = new List<MotionMark>();
 
