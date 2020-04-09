@@ -169,8 +169,12 @@ namespace OMF_Editor
             TextBox current = sender as TextBox;
             string mask = current.Tag.ToString() == "MotionName" ? @"^\w*$" : @"^[0-9,]*$";           
             Match match = Regex.Match(current.Text, mask);
-            if (!match.Success) current.Text = current.Text.Remove(current.Text.Length - 1, 1);
-            current.SelectionStart = current.Text.Length;
+            if (!match.Success)
+            {
+                int temp = current.SelectionStart;
+                current.Text = current.Text.Remove(current.SelectionStart-1, 1); 
+                current.SelectionStart = temp-1;
+            }
 
             AnimationParams CurrentAnim = listBox1.SelectedItem as AnimationParams;
 
