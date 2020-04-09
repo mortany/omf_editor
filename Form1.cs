@@ -20,13 +20,13 @@ namespace OMF_Editor
 
         BindingSource bs = new BindingSource();
 
-        int StopAtEnd = 1 << 1;
-        int NoMix = 1 << 2;
-        int SyncPart = 1 << 3;
-        int UseFootSteps = 1 << 4;
-        int MoveXForm = 1 << 5;
-        int Idle = 1 << 6;
-        int UseWeaponBone = 1 << 7;
+        //int StopAtEnd = 1 << 1;
+        //int NoMix = 1 << 2;
+        //int SyncPart = 1 << 3;
+        //int UseFootSteps = 1 << 4;
+        //int MoveXForm = 1 << 5;
+        //int Idle = 1 << 6;
+        //int UseWeaponBone = 1 << 7;
 
         int current_index = -1;
 
@@ -36,6 +36,8 @@ namespace OMF_Editor
         {
             InitializeComponent();
             InitButtons();
+            // Very dirty hack
+            if (Environment.GetCommandLineArgs().Length > 1) OpenFile(Environment.GetCommandLineArgs()[1]);
         }
 
         private void InitButtons()
@@ -86,8 +88,8 @@ namespace OMF_Editor
 
             if(error_v==1)
             {
-                MessageBox.Show("Скелеты OMF файлов различаются, объединение невозможно!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                DialogResult result = MessageBox.Show("Скелеты OMF файлов различаются, вы уверены что хотите объединить?", "Внимание!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (DialogResult == DialogResult.No) return;
             }
             else if(error_v == 2)
             {
