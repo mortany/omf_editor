@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace OMF_Editor
 {
@@ -38,6 +39,7 @@ namespace OMF_Editor
             InitButtons();
             // Very dirty hack
             if (Environment.GetCommandLineArgs().Length > 1) OpenFile(Environment.GetCommandLineArgs()[1]);
+            
         }
 
         private void InitButtons()
@@ -63,42 +65,57 @@ namespace OMF_Editor
             if (Main_OMF != null)
             {
                 bs.DataSource = Main_OMF.AnimsParams;
-                listBox1.DisplayMember = "Name";
                 listBox1.DataSource = bs;
+                listBox1.DisplayMember = "Name";
             }
         }
 
-        private void UpdateList()
+        AnimationsContainer OpenSecondOMF(string filename)
         {
-            //listBox1.DisplayMember = "Name";
+            if (Main_OMF == null) return null;
 
-           bs.ResetBindings(false);
+            AnimationsContainer new_omf = editor.OpenOMF(filename);
+
+            if (new_omf == null) return new_omf;
+
+            int error_v = editor.CompareOMF(Main_OMF, new_omf);
+
+            if (error_v == 1)
+            {
+                DialogResult result = GetErrorCode(1);
+                if (DialogResult == DialogResult.No) return null;
+            }
+            else if (error_v == 2)
+            {
+                GetErrorCode(2);
+            }
+
+            return new_omf;
+        }
+
+        private void UpdateList(bool save_pos = false)
+        {
+            int pos = listBox1.SelectedIndex;
+            bs.ResetBindings(false);
+            if (save_pos) listBox1.SelectedIndex = pos;
+            MotionParamsUpdate();
+        }
+
+        private void AppendFile(string filename, List<string> list)
+        {
+            AnimationsContainer new_omf = OpenSecondOMF(filename);
+            if (new_omf == null) return;
+            editor.CopyAnims(Main_OMF, new_omf, list);
+            UpdateList();
 
         }
 
         private void AppendFile(string filename)
         {
-            if (Main_OMF == null) OpenFile(filename);
-
-            AnimationsContainer new_omf = editor.OpenOMF(filename);
-
+            AnimationsContainer new_omf = OpenSecondOMF(filename);
             if (new_omf == null) return;
-
-            int error_v = editor.CompareOMF(Main_OMF, new_omf);
-
-            if(error_v==1)
-            {
-                DialogResult result = MessageBox.Show("Скелеты OMF файлов различаются, вы уверены что хотите объединить?", "Внимание!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (DialogResult == DialogResult.No) return;
-            }
-            else if(error_v == 2)
-            {
-                MessageBox.Show("Версии OMF отличаются, параметры анимаций будут преобразованы под текущую версию OMF", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-
             editor.CopyAnims(Main_OMF, new_omf);
             UpdateList();
-
         }
 
         private void SaveOMF(AnimationsContainer omf_file, string file_name)
@@ -112,30 +129,41 @@ namespace OMF_Editor
         private void button1_Click(object sender, EventArgs e)
         {
             openFileDialog1.FileName = "";
-            openFileDialog1.Tag = "Open";
-            openFileDialog1.ShowDialog();
+            DialogResult res = openFileDialog1.ShowDialog();
+
+            if(res == DialogResult.OK)
+            {
+                try
+                {
+                    OpenFile(openFileDialog1.FileName);
+                }
+                catch (Exception exp)
+                {
+                    MessageBox.Show(exp.ToString());
+                }
+
+            }
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             openFileDialog1.FileName = "";
-            openFileDialog1.Tag = "Append";
-            openFileDialog1.ShowDialog();
-        }
+            DialogResult res = openFileDialog1.ShowDialog();
 
-        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
-        {
-            try
+            if (res == DialogResult.OK)
             {
-                if(openFileDialog1.Tag.ToString() == "Open")
-                    OpenFile(openFileDialog1.FileName);
-                else
+                try
+                {
                     AppendFile(openFileDialog1.FileName);
+                }
+                catch (Exception exp)
+                {
+                    MessageBox.Show(exp.ToString());
+                }
+
             }
-            catch (Exception exp)
-            {
-                MessageBox.Show(exp.ToString());
-            }
+
+
 
         }
 
@@ -150,6 +178,11 @@ namespace OMF_Editor
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            MotionParamsUpdate();
+        }
+
+        private void MotionParamsUpdate()
         {
             if (Main_OMF == null) return;
 
@@ -186,10 +219,13 @@ namespace OMF_Editor
                 case "Falloff": CurrentAnim.Falloff = Convert.ToSingle(current.Text); break;
                 case "MotionName":
                     {
+                        if (CurrentAnim.Name == current.Text) return;
                         CurrentAnim.Name = current.Text; 
                         int index = CurrentAnim.MotionID;
                         Main_OMF.Anims[index].Name = current.Text;
-                    }break;
+                        UpdateList(true);
+                    }
+                    break;
                 default: break;
             }
         }
@@ -218,8 +254,6 @@ namespace OMF_Editor
         private void cloneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (current_index == -1) return;
-
-
         }
 
         private void listBox1_MouseDown(object sender, MouseEventArgs e)
@@ -231,6 +265,7 @@ namespace OMF_Editor
             {
                 contextMenuStrip1.Show(Cursor.Position);
                 deleteToolStripMenuItem.Enabled = listBox1.Items.Count > 1;
+                cloneToolStripMenuItem.Enabled = listBox1.Items.Count > 0;
                 contextMenuStrip1.Visible = true;
                 current_index = index;
             }
@@ -278,6 +313,77 @@ namespace OMF_Editor
             if (Main_OMF == null) return;
 
             WriteAllFlags();
+        }
+
+
+        //Самая простая установка языка, тупо костыли
+
+        DialogResult GetErrorCode(int code)
+        {
+            bool rus = CultureInfo.CurrentCulture.ToString() == "ru-RU";
+
+            if (code == 1)
+            {
+                if (rus)
+                    return MessageBox.Show("Скелеты OMF файлов различаются, вы уверены что хотите объединить?", "Внимание!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                else
+                    return MessageBox.Show("The bones in OMF files are different, are you sure want to merge it?", "Attention!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            }
+            else
+            {
+                if (rus)
+                    return MessageBox.Show("Версии OMF отличаются, параметры анимаций будут преобразованы под текущую версию OMF", "Инфо", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                else
+                    return MessageBox.Show("OMF versions are different, animations parameters will be converted to current OMF version", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void listBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Delete)
+            {
+                if (listBox1.Items.Count == 1) return;
+
+                int cur = listBox1.SelectedIndex;
+                Main_OMF.Anims.RemoveAt(cur);
+                Main_OMF.AnimsParams.RemoveAt(cur);
+                Main_OMF.RecalcAllAnimIndex();
+                Main_OMF.RecalcAnimNum();
+                UpdateList();
+                //listBox1.SelectedIndex = current_index - 1;
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Form2 form = new Form2();
+            form.Owner = this;
+            DialogResult result = form.ShowDialog();
+            if (result == DialogResult.Cancel) form.Dispose();
+            if (result == DialogResult.OK)
+            {
+
+                if (form.richTextBox1.Text == "") return;
+
+                List<string> list = form.richTextBox1.Text.Split('\n').ToList();
+                form.Dispose();
+
+                openFileDialog1.FileName = "";
+                DialogResult res = openFileDialog1.ShowDialog();
+
+                if (res == DialogResult.OK)
+                {
+                    try
+                    {
+                        AppendFile(openFileDialog1.FileName, list);
+                    }
+                    catch (Exception exp)
+                    {
+                        MessageBox.Show(exp.ToString());
+                    }
+
+                }
+            }
         }
     }
 }

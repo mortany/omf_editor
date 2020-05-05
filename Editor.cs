@@ -39,6 +39,42 @@ namespace OMF_Editor
             omf_1.RecalcAllAnimIndex();
         }
 
+        public void CopyAnims(AnimationsContainer omf_1, AnimationsContainer omf_2, List<string> list)
+        {
+            omf_1.RecalcAnimNum();
+
+            short new_count = (short)omf_1.AnimsCount;
+
+            for (int i = 0; i < omf_2.Anims.Count; i++)
+            {
+                AnimVector anim = omf_2.Anims[i];
+
+                for (int ii = 0; ii < list.Count; ii++)
+                {
+                    if (anim.MotionName == list[ii])
+                    {
+                        omf_1.AddAnim(anim);
+
+                        AnimationParams anim_param = omf_2.AnimsParams[i];
+
+                        anim_param.MotionID = new_count;
+
+                        if ((omf_1.bone_cont.OGF_V != omf_2.bone_cont.OGF_V) && omf_1.bone_cont.OGF_V == 3)
+                        {
+                            anim_param.MarksCount = 0;
+                            anim_param.m_marks = null;
+                        }
+
+                        omf_1.AddAnimParams(anim_param);
+                        new_count++;
+                    }
+                }
+            }
+
+            omf_1.RecalcAnimNum();
+            omf_1.RecalcAllAnimIndex();
+
+        }
 
         public void WriteOMF(BinaryWriter writer, AnimationsContainer omf_file)
         {
