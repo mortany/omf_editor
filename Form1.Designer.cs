@@ -59,6 +59,7 @@ namespace OMF_Editor
             this.cloneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -126,9 +127,9 @@ namespace OMF_Editor
             this.groupBox1.Controls.Add(this.textBox3);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.textBox1);
-            this.groupBox1.Location = new System.Drawing.Point(223, 158);
+            this.groupBox1.Location = new System.Drawing.Point(223, 170);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(251, 225);
+            this.groupBox1.Size = new System.Drawing.Size(251, 239);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             // 
@@ -306,9 +307,9 @@ namespace OMF_Editor
             // 
             // groupBox2
             // 
-            this.groupBox2.Location = new System.Drawing.Point(223, 389);
+            this.groupBox2.Location = new System.Drawing.Point(223, 415);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(251, 43);
+            this.groupBox2.Size = new System.Drawing.Size(251, 17);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
             // 
@@ -367,11 +368,22 @@ namespace OMF_Editor
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(217, 144);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(257, 24);
+            this.button5.TabIndex = 9;
+            this.button5.Text = "Try Repair";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(481, 453);
+            this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label2);
@@ -383,7 +395,7 @@ namespace OMF_Editor
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "OMF Editor 1.05";
+            this.Text = "OMF Editor 1.06";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
@@ -424,6 +436,7 @@ namespace OMF_Editor
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
     }
 }
 

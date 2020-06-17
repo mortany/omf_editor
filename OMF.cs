@@ -31,10 +31,15 @@ namespace OMF_Editor
             SectionSize = new_size;
 
             // Recalc second section size
-            new_size = 2; // motions count ( short )
+            new_size = 6; // motions count ( short )
 
             foreach (AnimationParams anim in AnimsParams)
-                new_size += (uint)anim.Size(bone_cont.OGF_V);
+            {
+                uint temp = (uint)anim.Size(bone_cont.OGF_V);
+
+                new_size += temp;
+            }
+                
 
             new_size += (uint)bone_cont.Size();
 
@@ -64,7 +69,22 @@ namespace OMF_Editor
             }
         }
 
-
+        public void GunslingerRepair()
+        {
+            short i = 0;
+            foreach (AnimationParams anm in AnimsParams)
+            {
+                anm.MotionID = i;
+                i++;
+            }
+            i = 1;
+            foreach (AnimVector anm in Anims)
+            {
+                anm.Name = AnimsParams[i - 1].Name;
+                anm.SectionId = i;
+                i++;
+            }
+        }
 
         public BoneContainer bone_cont;
 
@@ -200,7 +220,7 @@ namespace OMF_Editor
                 new_size += bonesparts.Size();
             }
 
-            return new_size + 4;
+            return new_size;
         }
 
         public List<BoneParts> parts = new List<BoneParts>();
@@ -274,6 +294,13 @@ namespace OMF_Editor
             }
         }
 
+        public uint Size()
+        {
+            uint temp = (uint)(Name.Length + 8 * Count + 6);
+
+            return temp;
+        }
+
         public void WriteMotionMark(BinaryWriter writer, OMFEditor editor)
         {
             editor.WriteMarkString(writer, Name);
@@ -310,16 +337,26 @@ namespace OMF_Editor
         public float Falloff { get; set; }
         public int MarksCount { get; set; }
 
-        public int Size(short motion_version)
+        public uint Size(short motion_version)
         {
-            int new_size = 0;
+            uint new_size = 0;
 
             if(motion_version == 4)
             {
-                new_size += (8 * MarksCount) + 4;
-            }
+                new_size += 4;
 
-            return new_size + Name.Length + 25;
+                if (m_marks != null)
+                {
+                    foreach (MotionMark mark in m_marks)
+                    {
+                        uint temp = mark.Size();
+                        new_size += temp;
+                    }    
+                        
+                }
+            }
+            
+            return new_size + (uint)(Name.Length + 25);
         }
 
         public List<MotionMark> m_marks; // = new List<MotionMark>();

@@ -105,6 +105,12 @@ namespace OMF_Editor
         {
             AnimationsContainer new_omf = OpenSecondOMF(filename);
             if (new_omf == null) return;
+
+            for (int i = 0; i < Main_OMF.Anims.Count; i++)
+            {
+                list.Remove(Main_OMF.Anims[i].MotionName);
+            }
+
             editor.CopyAnims(Main_OMF, new_omf, list);
             UpdateList();
 
@@ -384,6 +390,13 @@ namespace OMF_Editor
 
                 }
             }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (Main_OMF == null) return;
+
+            Main_OMF.GunslingerRepair();
         }
     }
 }

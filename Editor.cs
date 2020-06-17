@@ -9,7 +9,6 @@ namespace OMF_Editor
 {
     public class OMFEditor
     {
-
         public void CopyAnims(AnimationsContainer omf_1, AnimationsContainer omf_2)
         {
             //bool omf_1.bone_cont.OGF_V != omf_2.bone_cont.OGF_V
