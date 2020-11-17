@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Reflection;
 
 namespace OMF_Editor
 {
@@ -20,6 +21,8 @@ namespace OMF_Editor
         AnimationsContainer Main_OMF;
 
         BindingSource bs = new BindingSource();
+
+        string number_mask = "";
 
         //int StopAtEnd = 1 << 1;
         //int NoMix = 1 << 2;
@@ -36,6 +39,9 @@ namespace OMF_Editor
         public Form1()
         {
             InitializeComponent();
+
+            number_mask = CultureInfo.CurrentCulture.Name == "ru-RU" ? @"^[0-9,]*$" : @"^[0-9.]*$";
+
             InitButtons();
             // Very dirty hack
             if (Environment.GetCommandLineArgs().Length > 1) OpenFile(Environment.GetCommandLineArgs()[1]);
@@ -46,6 +52,8 @@ namespace OMF_Editor
         {
             openFileDialog1.Filter = "OMF file|*.omf";
             saveFileDialog1.Filter = "OMF file|*.omf";
+
+            this.Text = "OMF editor " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             cloneToolStripMenuItem.Enabled = false;
 
@@ -206,7 +214,10 @@ namespace OMF_Editor
             if (Main_OMF == null) return;
 
             TextBox current = sender as TextBox;
-            string mask = current.Tag.ToString() == "MotionName" ? @"^\w*$" : @"^[0-9,]*$";           
+
+            string mask = current.Tag.ToString() == "MotionName" ? @"^\w*$" : number_mask;
+            
+
             Match match = Regex.Match(current.Text, mask);
             if (!match.Success)
             {

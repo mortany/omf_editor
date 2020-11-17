@@ -159,9 +159,8 @@ namespace OMF_Editor
 
                 b = reader.ReadByte();
 
-                if (b == 0 || b == 10 || b == 13)
+                if (b == 0)
                 {
-                    if (b == 13) reader.ReadByte();
                     return str;
                 }
                 else
@@ -172,9 +171,33 @@ namespace OMF_Editor
             }
         }
 
+        public string ReadMotionMarkString(BinaryReader reader)
+        {
+            string str = "";
+
+            while (true)
+            {
+                byte b = reader.ReadByte();
+
+                if (b == 10 || b == 13)
+                {
+                    if (b == 13) reader.ReadByte();
+                    return str;
+                }
+                else
+                {
+                    str += Convert.ToChar(b).ToString();
+                }
+            }
+        }
+
         public void WriteSuperString(BinaryWriter writer, string text)
         {
-            writer.Write(text.ToCharArray());
+
+            char[] temp = text.ToCharArray();
+            byte[] array = Array.ConvertAll(temp, q => Convert.ToByte(q));
+
+            writer.Write(array);
             writer.Write((byte)0);
         }
 

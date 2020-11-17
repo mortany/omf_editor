@@ -284,7 +284,7 @@ namespace OMF_Editor
 
         public MotionMark(BinaryReader reader, OMFEditor editor)
         {
-            Name = editor.ReadSuperString(reader);
+            Name = editor.ReadMotionMarkString(reader);
             Count = reader.ReadInt32();
 
             for (int n = 0; n < Count; n++)
