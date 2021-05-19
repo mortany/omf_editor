@@ -117,4 +117,41 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>113, 13</value>
+  </data>
+  <data name="contextMenuStrip1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>61, 4</value>
+  </data>
+  <data name="button1.Text" xml:space="preserve">
+    <value>Загрузить OMF</value>
+  </data>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Название анимации:</value>
+  </data>
+  <data name="button5.Text" xml:space="preserve">
+    <value>Починка OMF из Gunsilnger'a</value>
+  </data>
+  <data name="button3.Text" xml:space="preserve">
+    <value>Объединить OMF</value>
+  </data>
+  <data name="label3.Text" xml:space="preserve">
+    <value>Скорость:</value>
+  </data>
+  <data name="button2.Text" xml:space="preserve">
+    <value>Сохранить OMF</value>
+  </data>
+  <data name="button4.Text" xml:space="preserve">
+    <value>Добавить анимации из файла</value>
+  </data>
+  <data name="label3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>58, 13</value>
+  </data>
+  <data name="MERGE_ERROR_1" xml:space="preserve">
+    <value>Скелеты OMF файлов различаются, вы уверены что хотите объединить?</value>
+  </data>
+  <data name="MERGE_ERROR_2" xml:space="preserve">
+    <value>Версии OMF отличаются, параметры анимаций будут преобразованы под текущую версию OMF</value>
+  </data>
 </root>

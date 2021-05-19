@@ -11,6 +11,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Reflection;
+using System.Resources;
 
 namespace OMF_Editor
 {
@@ -32,9 +33,15 @@ namespace OMF_Editor
         //int Idle = 1 << 6;
         //int UseWeaponBone = 1 << 7;
 
+        bool bKeyIsDown = false;
+        bool bTextBoxEnabled = false;
+  
         int current_index = -1;
 
         List<CheckBox> Boxes = new List<CheckBox>();
+        List<TextBox> textBoxes = new List<TextBox>();
+
+        ResourceManager rm = new ResourceManager(typeof(Form1));
 
         public Form1()
         {
@@ -64,6 +71,14 @@ namespace OMF_Editor
             Boxes.Add(checkBox5);
             Boxes.Add(checkBox6);
             Boxes.Add(checkBox7);
+
+            textBoxes.Add(textBox1);
+            textBoxes.Add(textBox3);
+            textBoxes.Add(textBox4);
+            textBoxes.Add(textBox5);
+            textBoxes.Add(textBox6);
+
+            DisableInput();
         }
 
         private void OpenFile(string filename)
@@ -90,12 +105,12 @@ namespace OMF_Editor
 
             if (error_v == 1)
             {
-                DialogResult result = GetErrorCode(1);
+                DialogResult result = MessageBox.Show(rm.GetString("MERGE_ERROR_1"),"Info", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (DialogResult == DialogResult.No) return null;
             }
             else if (error_v == 2)
             {
-                GetErrorCode(2);
+                MessageBox.Show(rm.GetString("MERGE_ERROR_2"), "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             return new_omf;
@@ -145,7 +160,7 @@ namespace OMF_Editor
             openFileDialog1.FileName = "";
             DialogResult res = openFileDialog1.ShowDialog();
 
-            if(res == DialogResult.OK)
+            if (res == DialogResult.OK)
             {
                 try
                 {
@@ -177,8 +192,6 @@ namespace OMF_Editor
 
             }
 
-
-
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -193,12 +206,15 @@ namespace OMF_Editor
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            MotionParamsUpdate();
+            if (bTextBoxEnabled && (listBox1.SelectedItems.Count > 1 || Main_OMF == null))
+                DisableInput();
+            else if (listBox1.SelectedItems.Count == 1)
+                MotionParamsUpdate();
         }
 
         private void MotionParamsUpdate()
         {
-            if (Main_OMF == null) return;
+            if(!bTextBoxEnabled) EnableInput();
 
             textBox1.Text = (listBox1.SelectedItem as AnimationParams).Name;
             textBox3.Text = (listBox1.SelectedItem as AnimationParams).Speed.ToString();
@@ -209,22 +225,56 @@ namespace OMF_Editor
             FillFlagsStates();
         }
 
+        private void DisableInput()
+        {
+            bTextBoxEnabled = false;
+            foreach (TextBox box in textBoxes)
+            {
+                box.Text = "";
+                box.Enabled = false;
+            }
+
+            foreach (CheckBox box in Boxes)
+            {
+                box.Enabled = false;
+                box.Checked = false;
+            }
+        }
+
+        private void EnableInput()
+        {
+            bTextBoxEnabled = true;
+            foreach (TextBox box in textBoxes)
+            {
+                box.Text = "";
+                box.Enabled = true;
+            }
+
+            foreach (CheckBox box in Boxes)
+            {
+                box.Enabled = true;
+            }
+        }
+
         private void TextBoxFilter(object sender, EventArgs e)
         {
-            if (Main_OMF == null) return;
+            if (Main_OMF == null || !bTextBoxEnabled) return;
 
             TextBox current = sender as TextBox;
 
-            string mask = current.Tag.ToString() == "MotionName" ? @"^\w*$" : number_mask;
-            
-
-            Match match = Regex.Match(current.Text, mask);
-            if (!match.Success)
+            if(bKeyIsDown)
             {
-                int temp = current.SelectionStart;
-                current.Text = current.Text.Remove(current.SelectionStart-1, 1); 
-                current.SelectionStart = temp-1;
+                string mask = current.Tag.ToString() == "MotionName" ? @"^[A-Za-z0-9_$]*$" : number_mask;
+                Match match = Regex.Match(current.Text, mask);
+                if (!match.Success)
+                {
+                    int temp = current.SelectionStart;
+                    current.Text = current.Text.Remove(current.SelectionStart - 1, 1);
+                    current.SelectionStart = temp - 1;
+                }
             }
+
+            bKeyIsDown = false;
 
             AnimationParams CurrentAnim = listBox1.SelectedItem as AnimationParams;
 
@@ -255,17 +305,13 @@ namespace OMF_Editor
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (current_index == -1) return;
+            if(listBox1.SelectedIndex == -1) return;
 
-            Main_OMF.Anims.RemoveAt(current_index);
-            Main_OMF.AnimsParams.RemoveAt(current_index);
+            Main_OMF.Anims.RemoveAt(listBox1.SelectedIndex);
+            Main_OMF.AnimsParams.RemoveAt(listBox1.SelectedIndex);
             Main_OMF.RecalcAllAnimIndex();
             Main_OMF.RecalcAnimNum();
             UpdateList();
-            if (current_index != 0) listBox1.SelectedIndex = current_index - 1;
-            else listBox1.SelectedIndex = 0;
-
-            current_index = -1;
         }
 
         private void cloneToolStripMenuItem_Click(object sender, EventArgs e)
@@ -284,12 +330,15 @@ namespace OMF_Editor
                 deleteToolStripMenuItem.Enabled = listBox1.Items.Count > 1;
                 cloneToolStripMenuItem.Enabled = listBox1.Items.Count > 0;
                 contextMenuStrip1.Visible = true;
-                current_index = index;
+
+                listBox1.SelectedIndex = index;
+
+                //current_index = index;
             }
             else
             {
                 contextMenuStrip1.Visible = false;
-                current_index = -1;
+                //current_index = -1;
             }
         }
 
@@ -332,42 +381,27 @@ namespace OMF_Editor
             WriteAllFlags();
         }
 
-
-        //Самая простая установка языка, тупо костыли
-
-        DialogResult GetErrorCode(int code)
-        {
-            bool rus = CultureInfo.CurrentCulture.ToString() == "ru-RU";
-
-            if (code == 1)
-            {
-                if (rus)
-                    return MessageBox.Show("Скелеты OMF файлов различаются, вы уверены что хотите объединить?", "Внимание!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                else
-                    return MessageBox.Show("The bones in OMF files are different, are you sure want to merge it?", "Attention!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            }
-            else
-            {
-                if (rus)
-                    return MessageBox.Show("Версии OMF отличаются, параметры анимаций будут преобразованы под текущую версию OMF", "Инфо", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                else
-                    return MessageBox.Show("OMF versions are different, animations parameters will be converted to current OMF version", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
-
         private void listBox1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyData == Keys.Delete)
             {
                 if (listBox1.Items.Count == 1) return;
+               
+                ListBox.SelectedIndexCollection _list = listBox1.SelectedIndices;
+                int count = _list.Count;
 
-                int cur = listBox1.SelectedIndex;
-                Main_OMF.Anims.RemoveAt(cur);
-                Main_OMF.AnimsParams.RemoveAt(cur);
+                while (count > 0 && Main_OMF.AnimsParams.Count > 1)
+                {
+                    int i = _list[count - 1];
+                    Main_OMF.AnimsParams.RemoveAt(i);
+                    Main_OMF.Anims.RemoveAt(i);
+                    --count;
+
+                }
+
                 Main_OMF.RecalcAllAnimIndex();
                 Main_OMF.RecalcAnimNum();
                 UpdateList();
-                //listBox1.SelectedIndex = current_index - 1;
             }
         }
 
@@ -408,6 +442,11 @@ namespace OMF_Editor
             if (Main_OMF == null) return;
 
             Main_OMF.GunslingerRepair();
+        }
+
+        private void textBox1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            bKeyIsDown = true;
         }
     }
 }
