@@ -35,7 +35,7 @@ namespace OMF_Editor
 
         bool bKeyIsDown = false;
         bool bTextBoxEnabled = false;
-  
+        bool bMotMarkPanel = false;
         int current_index = -1;
 
         List<CheckBox> Boxes = new List<CheckBox>();
@@ -50,6 +50,7 @@ namespace OMF_Editor
             number_mask = CultureInfo.CurrentCulture.Name == "ru-RU" ? @"^[0-9,]*$" : @"^[0-9.]*$";
 
             InitButtons();
+
             // Very dirty hack
             if (Environment.GetCommandLineArgs().Length > 1) OpenFile(Environment.GetCommandLineArgs()[1]);
             
@@ -64,19 +65,21 @@ namespace OMF_Editor
 
             cloneToolStripMenuItem.Enabled = false;
 
-            Boxes.Add(checkBox1);
-            Boxes.Add(checkBox2);
-            Boxes.Add(checkBox3);
-            Boxes.Add(checkBox4);
-            Boxes.Add(checkBox5);
-            Boxes.Add(checkBox6);
-            Boxes.Add(checkBox7);
+            Boxes.Add(chbxStopAtEnd);
+            Boxes.Add(chbxNoMix);
+            Boxes.Add(chbxSyncPart);
+            Boxes.Add(chbxUseFootSteps);
+            Boxes.Add(chbxMoveXForm);
+            Boxes.Add(chbxIdle);
+            Boxes.Add(chbxUseWeaponBone);
+            Boxes.Add(chbxHasMotionMarks);
 
-            textBoxes.Add(textBox1);
-            textBoxes.Add(textBox3);
-            textBoxes.Add(textBox4);
-            textBoxes.Add(textBox5);
-            textBoxes.Add(textBox6);
+            textBoxes.Add(tbxMotName);
+            textBoxes.Add(tbxMotSpeed);
+            textBoxes.Add(tbxMotPower);
+            textBoxes.Add(tbxMotAcc);
+            textBoxes.Add(tbxMotFall);
+            textBoxes.Add(tbxMotLenght);
 
             DisableInput();
         }
@@ -88,8 +91,9 @@ namespace OMF_Editor
             if (Main_OMF != null)
             {
                 bs.DataSource = Main_OMF.AnimsParams;
-                listBox1.DataSource = bs;
-                listBox1.DisplayMember = "Name";
+                lbxMotions.DataSource = bs;
+                lbxMotions.DisplayMember = "Name";
+                Main_OMF.FileName = filename;
             }
         }
 
@@ -118,9 +122,9 @@ namespace OMF_Editor
 
         private void UpdateList(bool save_pos = false)
         {
-            int pos = listBox1.SelectedIndex;
+            int pos = lbxMotions.SelectedIndex;
             bs.ResetBindings(false);
-            if (save_pos) listBox1.SelectedIndex = pos;
+            if (save_pos) lbxMotions.SelectedIndex = pos;
             MotionParamsUpdate();
         }
 
@@ -155,106 +159,164 @@ namespace OMF_Editor
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void SetT0(float t0)
         {
-            openFileDialog1.FileName = "";
-            DialogResult res = openFileDialog1.ShowDialog();
-
-            if (res == DialogResult.OK)
-            {
-                try
-                {
-                    OpenFile(openFileDialog1.FileName);
-                }
-                catch (Exception exp)
-                {
-                    MessageBox.Show(exp.ToString());
-                }
-
-            }
+            GetCurrentMotion().m_marks[listMotionMarksGroup.SelectedIndices[0]].m_params[listMotionMarksParams.SelectedIndices[0]].t0 = t0;
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void SetT1(float t1)
         {
-            openFileDialog1.FileName = "";
-            DialogResult res = openFileDialog1.ShowDialog();
+            GetCurrentMotion().m_marks[listMotionMarksGroup.SelectedIndices[0]].m_params[listMotionMarksParams.SelectedIndices[0]].t1 = t1;
+        }
 
-            if (res == DialogResult.OK)
-            {
-                try
-                {
-                    AppendFile(openFileDialog1.FileName);
-                }
-                catch (Exception exp)
-                {
-                    MessageBox.Show(exp.ToString());
-                }
+        private AnimationParams GetCurrentMotion()
+        {
+            if(lbxMotions.SelectedIndex != -1)
+                return lbxMotions.SelectedItem as AnimationParams;
+            else
+                return null;
+        }
 
-            }
+        private AnimVector GetCurrentAnimVector()
+        {
+            if (lbxMotions.SelectedIndex != -1)
+                return Main_OMF.Anims[lbxMotions.SelectedIndex];
+            else
+                return null;
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void MotionParamsUpdate(bool dont_reset_pos = false)
         {
-            if(Main_OMF != null)
-            {
-                saveFileDialog1.FileName = "";
-                saveFileDialog1.ShowDialog();
-            }
-                
-        }
+            if(GetCurrentMotion()== null) return;
 
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (bTextBoxEnabled && (listBox1.SelectedItems.Count > 1 || Main_OMF == null))
-                DisableInput();
-            else if (listBox1.SelectedItems.Count == 1)
-                MotionParamsUpdate();
-        }
-
-        private void MotionParamsUpdate()
-        {
             if(!bTextBoxEnabled) EnableInput();
 
-            textBox1.Text = (listBox1.SelectedItem as AnimationParams).Name;
-            textBox3.Text = (listBox1.SelectedItem as AnimationParams).Speed.ToString();
-            textBox4.Text = (listBox1.SelectedItem as AnimationParams).Power.ToString();
-            textBox5.Text = (listBox1.SelectedItem as AnimationParams).Accrue.ToString();
-            textBox6.Text = (listBox1.SelectedItem as AnimationParams).Falloff.ToString();
+            tbxMotName.Text = GetCurrentMotion().Name;
+            tbxMotSpeed.Text = GetCurrentMotion().Speed.ToString();
+            tbxMotPower.Text = GetCurrentMotion().Power.ToString();
+            tbxMotAcc.Text = GetCurrentMotion().Accrue.ToString();
+            tbxMotFall.Text = GetCurrentMotion().Falloff.ToString();
 
+            float keys_lenght = GetCurrentAnimVector().GetNumKeys() / (radioButton1.Checked ? 30.0f : 1.0f);
+
+            tbxMotLenght.Text = keys_lenght.ToString();
             FillFlagsStates();
+
+            CheckMotionMarksAvaiableAndUpdate(dont_reset_pos);
         }
 
-        private void DisableInput()
+        private void listMotionMarksGroup_SelectedIndexChanged(object sender, EventArgs e)
         {
-            bTextBoxEnabled = false;
-            foreach (TextBox box in textBoxes)
-            {
-                box.Text = "";
-                box.Enabled = false;
-            }
-
-            foreach (CheckBox box in Boxes)
-            {
-                box.Enabled = false;
-                box.Checked = false;
-            }
+            if (bMotionMarksGroupSelected())
+                MotionMarksParamUpdate(listMotionMarksGroup.SelectedIndices[0]);
+            else
+                MotionMarksParamUpdate(-1);
         }
 
-        private void EnableInput()
+        private void listMotionMarksParams_SelectedIndexChanged(object sender, EventArgs e)
         {
-            bTextBoxEnabled = true;
-            foreach (TextBox box in textBoxes)
-            {
-                box.Text = "";
-                box.Enabled = true;
-            }
+            if(bMotionMarksGroupSelected() && bMotionMarkSelected())
+                MotionMarksParamValuesUpdate(listMotionMarksGroup.SelectedIndices[0], listMotionMarksParams.SelectedIndices[0]);
+            else
+                MotionMarksParamValuesUpdate(-1,-1);
+        }
 
-            foreach (CheckBox box in Boxes)
+        private void MotionMarksParamValuesUpdate(int index, int index2)
+        {
+            if (index != -1 && index2 != -1)
             {
-                box.Enabled = true;
+                var currentAnimParams = GetCurrentMotion().m_marks[index].m_params[index2];
+                ChangeMarksParamsEditState(true);
+                boxStartMotionMark.Text = (currentAnimParams.t0 * (radioButton1.Checked ? 1 : 30.0f)).ToString();
+                boxEndMotionMark.Text = (currentAnimParams.t1 * (radioButton1.Checked ? 1 : 30.0f)).ToString();
+            }
+            else
+            {
+                ChangeMarksParamsEditState(false);
             }
         }
+
+        private void CheckMotionMarksAvaiableAndUpdate(bool dont_reset_pos = false)
+        {
+            if (!bMotMarkPanel && chbxHasMotionMarks.Checked)
+                ChangeMotionMarksPanelState(true);
+            else if (bMotMarkPanel && !chbxHasMotionMarks.Checked)
+                ChangeMotionMarksPanelState(false);
+
+            if(!dont_reset_pos) MotionMarkPanelReset();
+
+            MotionMarksGroupUpdate(dont_reset_pos);
+        }
+
+        private void MotionMarksGroupUpdate(bool save_pos = false)
+        {
+            int pos = bMotionMarksGroupSelected() && save_pos ? listMotionMarksGroup.SelectedIndices[0] : 0;
+
+            listMotionMarksGroup.Items.Clear();
+
+            if(GetCurrentMotion().m_marks != null)
+            {
+                foreach (var mot in GetCurrentMotion().m_marks)
+                    listMotionMarksGroup.Items.Add(mot.Name);
+
+                if (listMotionMarksGroup.Items.Count > 0)
+                    listMotionMarksGroup.Items[pos].Selected = true;
+            }
+        }
+
+        private void MotionMarksParamUpdate(int index, bool save_pos = false)
+        {
+            int pos = bMotionMarkSelected() && save_pos ? listMotionMarksParams.SelectedIndices[0] : 0;
+
+            listMotionMarksParams.Items.Clear();
+
+            if (index != -1)
+            {
+                ChangeMarksParamsPanelState(true);
+
+                var currentAnimParams = GetCurrentMotion().m_marks[index].m_params;
+
+                for (int i = 0; i < currentAnimParams.Count; i++)
+                {
+                    listMotionMarksParams.Items.Add(index+"_mark" + i);
+                }
+
+                if (listMotionMarksParams.Items.Count > 0)
+                    listMotionMarksParams.Items[pos].Selected = true;
+            }
+            else
+            {
+                ChangeMarksParamsPanelState(false);
+                listMotionMarksParams_SelectedIndexChanged(null,null);
+            }
+        }
+
+        private void FillFlagsStates()
+        {
+            if (Main_OMF == null) return;
+
+            int Flags = GetCurrentMotion().Flags;
+
+            for(int i = 1; i < 8;i++)
+            {
+                Boxes[i - 1].Checked = (Flags & (1 << i)) == (1 << i);
+            }
+
+            chbxHasMotionMarks.Checked = (Main_OMF.GetMotionVersion() == 4 && GetCurrentMotion().m_marks != null);
+        }
+
+        private void WriteAllFlags()
+        {
+            if (Main_OMF == null) return;
+
+            for(int i = 1; i < 8;i++)
+            {
+                GetCurrentMotion().Flags = BitSet(GetCurrentMotion().Flags, (1 << i), Boxes[i - 1].Checked);
+            }
+        }
+
+        //Events
 
         private void TextBoxFilter(object sender, EventArgs e)
         {
@@ -262,7 +324,7 @@ namespace OMF_Editor
 
             TextBox current = sender as TextBox;
 
-            if(bKeyIsDown)
+            if (bKeyIsDown)
             {
                 string mask = current.Tag.ToString() == "MotionName" ? @"^[A-Za-z0-9_$]*$" : number_mask;
                 Match match = Regex.Match(current.Text, mask);
@@ -276,19 +338,17 @@ namespace OMF_Editor
 
             bKeyIsDown = false;
 
-            AnimationParams CurrentAnim = listBox1.SelectedItem as AnimationParams;
-
             switch (current.Tag.ToString())
             {
-                case "Speed": CurrentAnim.Speed = Convert.ToSingle(current.Text); break;
-                case "Power": CurrentAnim.Power = Convert.ToSingle(current.Text); break;
-                case "Accrue": CurrentAnim.Accrue = Convert.ToSingle(current.Text); break;
-                case "Falloff": CurrentAnim.Falloff = Convert.ToSingle(current.Text); break;
+                case "Speed": GetCurrentMotion().Speed = Convert.ToSingle(current.Text); break;
+                case "Power": GetCurrentMotion().Power = Convert.ToSingle(current.Text); break;
+                case "Accrue": GetCurrentMotion().Accrue = Convert.ToSingle(current.Text); break;
+                case "Falloff": GetCurrentMotion().Falloff = Convert.ToSingle(current.Text); break;
                 case "MotionName":
                     {
-                        if (CurrentAnim.Name == current.Text) return;
-                        CurrentAnim.Name = current.Text; 
-                        int index = CurrentAnim.MotionID;
+                        if (GetCurrentMotion().Name == current.Text) return;
+                        GetCurrentMotion().Name = current.Text;
+                        int index = GetCurrentMotion().MotionID;
                         Main_OMF.Anims[index].Name = current.Text;
                         UpdateList(true);
                     }
@@ -297,7 +357,6 @@ namespace OMF_Editor
             }
         }
 
-
         private void saveFileDialog1_FileOk(object sender, CancelEventArgs e)
         {
             SaveOMF(Main_OMF, (sender as SaveFileDialog).FileName);
@@ -305,10 +364,10 @@ namespace OMF_Editor
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(listBox1.SelectedIndex == -1) return;
+            if (lbxMotions.SelectedIndex == -1) return;
 
-            Main_OMF.Anims.RemoveAt(listBox1.SelectedIndex);
-            Main_OMF.AnimsParams.RemoveAt(listBox1.SelectedIndex);
+            Main_OMF.Anims.RemoveAt(lbxMotions.SelectedIndex);
+            Main_OMF.AnimsParams.RemoveAt(lbxMotions.SelectedIndex);
             Main_OMF.RecalcAllAnimIndex();
             Main_OMF.RecalcAnimNum();
             UpdateList();
@@ -323,15 +382,15 @@ namespace OMF_Editor
         {
             if (e.Button != MouseButtons.Right) return;
 
-            var index = listBox1.IndexFromPoint(e.Location);
+            var index = lbxMotions.IndexFromPoint(e.Location);
             if (index != ListBox.NoMatches)
             {
                 contextMenuStrip1.Show(Cursor.Position);
-                deleteToolStripMenuItem.Enabled = listBox1.Items.Count > 1;
-                cloneToolStripMenuItem.Enabled = listBox1.Items.Count > 0;
+                deleteToolStripMenuItem.Enabled = lbxMotions.Items.Count > 1;
+                cloneToolStripMenuItem.Enabled = lbxMotions.Items.Count > 0;
                 contextMenuStrip1.Visible = true;
 
-                listBox1.SelectedIndex = index;
+                lbxMotions.SelectedIndex = index;
 
                 //current_index = index;
             }
@@ -340,38 +399,6 @@ namespace OMF_Editor
                 contextMenuStrip1.Visible = false;
                 //current_index = -1;
             }
-        }
-
-        private void FillFlagsStates()
-        {
-            if (Main_OMF == null) return;
-
-            AnimationParams CurrentAnim = listBox1.SelectedItem as AnimationParams;
-            int Flags = CurrentAnim.Flags;
-
-            for(int i = 1; i < 8;i++)
-            {
-                Boxes[i - 1].Checked = (Flags & (1 << i)) == (1 << i);
-            }
-        }
-
-        private void WriteAllFlags()
-        {
-            if (Main_OMF == null) return;
-            AnimationParams CurrentAnim = listBox1.SelectedItem as AnimationParams;
-
-            for(int i = 1; i < 8;i++)
-            {
-                CurrentAnim.Flags = BitSet(CurrentAnim.Flags, (1 << i), Boxes[i - 1].Checked);
-            }
-        }
-
-        private int BitSet(int flags, int mask,bool bvalue)
-        {
-            if(bvalue)
-                return flags |= mask;
-            else 
-                return flags &= ~mask;
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -385,9 +412,9 @@ namespace OMF_Editor
         {
             if (e.KeyData == Keys.Delete)
             {
-                if (listBox1.Items.Count == 1) return;
+                if (lbxMotions.Items.Count == 1) return;
                
-                ListBox.SelectedIndexCollection _list = listBox1.SelectedIndices;
+                ListBox.SelectedIndexCollection _list = lbxMotions.SelectedIndices;
                 int count = _list.Count;
 
                 while (count > 0 && Main_OMF.AnimsParams.Count > 1)
@@ -405,7 +432,7 @@ namespace OMF_Editor
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void buttonAddAnims_Click(object sender, EventArgs e)
         {
             Form2 form = new Form2();
             form.Owner = this;
@@ -437,7 +464,7 @@ namespace OMF_Editor
             }
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        private void buttonRepair_Click(object sender, EventArgs e)
         {
             if (Main_OMF == null) return;
 
@@ -448,5 +475,203 @@ namespace OMF_Editor
         {
             bKeyIsDown = true;
         }
-    }
+
+		private void Form1_KeyDown(object sender, KeyEventArgs e)
+		{
+            switch (e.KeyData)
+            {
+                case Keys.F4: buttonLoad_Click(null,null); break;
+                case Keys.F5: buttonSave_Click(null,null); break;
+                case Keys.F6: buttonSaveAs_Click(null,null); break;
+            }
+        }
+
+        private void buttonLoad_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.FileName = "";
+            DialogResult res = openFileDialog1.ShowDialog();
+
+            if (res == DialogResult.OK)
+            {
+                try
+                {
+                    OpenFile(openFileDialog1.FileName);
+                }
+                catch (Exception exp)
+                {
+                    MessageBox.Show(exp.ToString());
+                }
+
+            }
+        }
+
+        private void buttonMerge_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.FileName = "";
+            DialogResult res = openFileDialog1.ShowDialog();
+
+            if (res == DialogResult.OK)
+            {
+                try
+                {
+                    AppendFile(openFileDialog1.FileName);
+                }
+                catch (Exception exp)
+                {
+                    MessageBox.Show(exp.ToString());
+                }
+
+            }
+
+        }
+
+        private void buttonSaveAs_Click(object sender, EventArgs e)
+        {
+            if (Main_OMF != null)
+            {
+                saveFileDialog1.FileName = "";
+                saveFileDialog1.ShowDialog();
+            }
+
+        }
+
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+            if (Main_OMF != null)
+            {
+                SaveOMF(Main_OMF, Main_OMF.FileName);
+                AutoClosingMessageBox.Show("Saved!", "", 500, MessageBoxIcon.Information);
+            }
+
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (bTextBoxEnabled && (lbxMotions.SelectedItems.Count > 1 || Main_OMF == null))
+                DisableInput();
+            else if (lbxMotions.SelectedItems.Count == 1)
+                MotionParamsUpdate();
+        }
+
+        private void listMotionMarksGroup_AfterLabelEdit(object sender, LabelEditEventArgs e)
+        {
+            GetCurrentMotion().m_marks[e.Item].Name = e.Label;
+        }
+
+        private void btnAddMarkGroup_Click(object sender, EventArgs e)
+		{
+            MotionMark motionMark = new MotionMark();
+            motionMark.Name = "NewGroup"+ GetCurrentMotion().m_marks.Count;
+            motionMark.m_params = new List<MotionMarkParams>();
+            GetCurrentMotion().m_marks.Add(motionMark);
+            GetCurrentMotion().MarksCount += 1;
+
+            MotionMarksGroupUpdate(true);
+
+        }
+
+        private void btnAddMark_Click(object sender, EventArgs e)
+        {
+            MotionMarkParams motionMarkParams = new MotionMarkParams();
+            GetCurrentMotion().m_marks[listMotionMarksGroup.SelectedIndices[0]].m_params.Add(motionMarkParams);
+            GetCurrentMotion().m_marks[listMotionMarksGroup.SelectedIndices[0]].Count +=1;
+            MotionMarksParamUpdate(listMotionMarksGroup.SelectedIndices[0],true);
+
+        }
+
+        private void btnDelMarkGroup_Click(object sender, EventArgs e)
+        {
+            if(!bMotionMarksGroupSelected()) return;
+
+            GetCurrentMotion().m_marks.RemoveAt(listMotionMarksGroup.SelectedIndices[0]);
+            GetCurrentMotion().MarksCount -= 1;
+            MotionMarksGroupUpdate();
+
+            listMotionMarksGroup_SelectedIndexChanged(null, null);
+        }
+
+        private void btnDelMark_Click(object sender, EventArgs e)
+        {
+            if(!bMotionMarkSelected()) return;
+
+            GetCurrentMotion().m_marks[listMotionMarksGroup.SelectedIndices[0]].m_params.RemoveAt(listMotionMarksParams.SelectedIndices[0]);
+            GetCurrentMotion().m_marks[listMotionMarksGroup.SelectedIndices[0]].Count -= 1;
+            MotionMarksParamUpdate(listMotionMarksGroup.SelectedIndices[0]);
+
+            listMotionMarksParams_SelectedIndexChanged(null,null);
+        }
+
+        private void chbxHasMotionMarks_Click(object sender, EventArgs e)
+		{
+            if(!chbxHasMotionMarks.Checked) 
+            {
+                if(Main_OMF.GetMotionVersion()!=4)
+                {
+                    DialogResult result = MessageBox.Show("This operation will update OMF version from v3 to v4", "Upgrade.", MessageBoxButtons.YesNo);
+
+                    if(result == DialogResult.Yes)
+                        Main_OMF.bone_cont.OGF_V = 4;
+                    else
+                        return;
+                }
+                
+                chbxHasMotionMarks.Checked = true;
+                GetCurrentMotion().m_marks = new List<MotionMark>();
+
+                CheckMotionMarksAvaiableAndUpdate();
+
+            }
+            else
+            {
+                DialogResult result = MessageBox.Show("This operation will delete all existing motion marks. Are you sure?", "Warning!", MessageBoxButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                {
+                    chbxHasMotionMarks.Checked = false;
+                    GetCurrentMotion().MarksCount = 0;
+                    GetCurrentMotion().m_marks = null;
+
+                    CheckMotionMarksAvaiableAndUpdate();
+                }
+            }
+
+
+                
+        }
+
+		private void boxMotionMark_TextChanged(object sender, EventArgs e)
+		{
+            if (Main_OMF == null || !(sender as Control).Enabled) return;
+
+            if(!bMotionMarksGroupSelected() || !bMotionMarkSelected()) return;
+
+            TextBox current = sender as TextBox;
+
+            if (bKeyIsDown)
+            {
+                Match match = Regex.Match(current.Text, number_mask);
+                if (!match.Success)
+                {
+                    int temp = current.SelectionStart;
+                    current.Text = current.Text.Remove(current.SelectionStart - 1, 1);
+                    current.SelectionStart = temp - 1;
+                }
+
+                float t = radioButton1.Checked ? 1.0f : 30.0f;
+
+                if (current == boxStartMotionMark)
+                    SetT0(Convert.ToSingle(boxStartMotionMark.Text)/t);
+                else
+                    SetT1(Convert.ToSingle(boxEndMotionMark.Text)/t);
+            }
+
+            bKeyIsDown = false;
+        }
+
+		private void radioButton1_CheckedChanged(object sender, EventArgs e)
+		{
+            MotionParamsUpdate(true);
+
+        }
+	}
 }

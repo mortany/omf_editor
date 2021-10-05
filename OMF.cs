@@ -15,6 +15,7 @@ namespace OMF_Editor
         public int AnimsCount;
         public short AnimsParamsCount;
 
+        public string FileName;
 
         public List<AnimVector> Anims = new List<AnimVector>();
         public List<AnimationParams> AnimsParams = new List<AnimationParams>();
@@ -45,6 +46,12 @@ namespace OMF_Editor
 
             bone_cont.SectionSize = new_size;
 
+        }
+
+        public string GetFileName()
+        {
+
+            return Path.GetFileNameWithoutExtension(FileName);
         }
 
         public void RecalcAnimNum()
@@ -158,6 +165,10 @@ namespace OMF_Editor
         public uint   SectionSize;
         public string Name;
         public byte[] data;
+        public int GetNumKeys()
+        {
+            return BitConverter.ToInt32(data,0);
+		}
 
         public uint GetSize()
         {
@@ -282,6 +293,11 @@ namespace OMF_Editor
 
         public List<MotionMarkParams> m_params = new List<MotionMarkParams>();
 
+        public MotionMark()
+        {
+            
+		}
+
         public MotionMark(BinaryReader reader, OMFEditor editor)
         {
             Name = editor.ReadMotionMarkString(reader);
@@ -296,7 +312,7 @@ namespace OMF_Editor
 
         public uint Size()
         {
-            uint temp = (uint)(Name.Length + 8 * Count + 6);
+            uint temp = (uint)(Name.Length + 8 * m_params.Count + 6);
 
             return temp;
         }
@@ -304,12 +320,15 @@ namespace OMF_Editor
         public void WriteMotionMark(BinaryWriter writer, OMFEditor editor)
         {
             editor.WriteMarkString(writer, Name);
-            writer.Write(Count);
+            writer.Write(m_params!=null? m_params.Count : 0);
 
-            foreach(MotionMarkParams param in m_params)
+            if(m_params!= null)
             {
-                writer.Write(param.t0);
-                writer.Write(param.t1);
+                foreach (MotionMarkParams param in m_params)
+                {
+                    writer.Write(param.t0);
+                    writer.Write(param.t1);
+                }
             }
         }
     }
@@ -318,6 +337,10 @@ namespace OMF_Editor
     {
         public float t0;
         public float t1;
+        public MotionMarkParams()
+        {
+            t0 = t1 = 0;
+		}
         public MotionMarkParams(BinaryReader reader)
         {
             t0 = reader.ReadSingle();
@@ -345,7 +368,7 @@ namespace OMF_Editor
             {
                 new_size += 4;
 
-                if (m_marks != null)
+                if (m_marks != null && m_marks.Count > 0)
                 {
                     foreach (MotionMark mark in m_marks)
                     {
@@ -403,9 +426,9 @@ namespace OMF_Editor
 
             if (motion_version != 4) return;
 
-            writer.Write(MarksCount);
+            writer.Write(m_marks != null ? m_marks.Count : 0);
 
-            if(MarksCount != 0 && m_marks != null)
+            if(m_marks != null)
             {
                 foreach (MotionMark mark in m_marks)
                     mark.WriteMotionMark(writer, editor);
