@@ -36,6 +36,12 @@ namespace OMF_Editor
 			this.btnSave = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.radioButton2 = new System.Windows.Forms.RadioButton();
+			this.label10 = new System.Windows.Forms.Label();
+			this.radioButton1 = new System.Windows.Forms.RadioButton();
+			this.tbxMotLenght = new System.Windows.Forms.TextBox();
+			this.label9 = new System.Windows.Forms.Label();
 			this.chbxHasMotionMarks = new System.Windows.Forms.CheckBox();
 			this.chbxUseWeaponBone = new System.Windows.Forms.CheckBox();
 			this.chbxIdle = new System.Windows.Forms.CheckBox();
@@ -53,7 +59,6 @@ namespace OMF_Editor
 			this.label3 = new System.Windows.Forms.Label();
 			this.tbxMotSpeed = new System.Windows.Forms.TextBox();
 			this.tbxMotName = new System.Windows.Forms.TextBox();
-			this.label2 = new System.Windows.Forms.Label();
 			this.btnMergeWith = new System.Windows.Forms.Button();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -75,16 +80,11 @@ namespace OMF_Editor
 			this.boxEndMotionMark = new System.Windows.Forms.TextBox();
 			this.label8 = new System.Windows.Forms.Label();
 			this.boxStartMotionMark = new System.Windows.Forms.TextBox();
-			this.label9 = new System.Windows.Forms.Label();
-			this.tbxMotLenght = new System.Windows.Forms.TextBox();
-			this.label10 = new System.Windows.Forms.Label();
-			this.radioButton1 = new System.Windows.Forms.RadioButton();
-			this.radioButton2 = new System.Windows.Forms.RadioButton();
-			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.linkLabel1 = new System.Windows.Forms.LinkLabel();
 			this.groupBox1.SuspendLayout();
+			this.groupBox2.SuspendLayout();
 			this.contextMenuStrip1.SuspendLayout();
 			this.groupMotomMarks.SuspendLayout();
-			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// lbxMotions
@@ -146,6 +146,48 @@ namespace OMF_Editor
 			resources.ApplyResources(this.groupBox1, "groupBox1");
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.TabStop = false;
+			// 
+			// groupBox2
+			// 
+			this.groupBox2.Controls.Add(this.radioButton2);
+			this.groupBox2.Controls.Add(this.label10);
+			this.groupBox2.Controls.Add(this.radioButton1);
+			resources.ApplyResources(this.groupBox2, "groupBox2");
+			this.groupBox2.Name = "groupBox2";
+			this.groupBox2.TabStop = false;
+			// 
+			// radioButton2
+			// 
+			resources.ApplyResources(this.radioButton2, "radioButton2");
+			this.radioButton2.Name = "radioButton2";
+			this.radioButton2.UseVisualStyleBackColor = true;
+			this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
+			// 
+			// label10
+			// 
+			resources.ApplyResources(this.label10, "label10");
+			this.label10.Name = "label10";
+			// 
+			// radioButton1
+			// 
+			resources.ApplyResources(this.radioButton1, "radioButton1");
+			this.radioButton1.Checked = true;
+			this.radioButton1.Name = "radioButton1";
+			this.radioButton1.TabStop = true;
+			this.radioButton1.UseVisualStyleBackColor = true;
+			this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
+			// 
+			// tbxMotLenght
+			// 
+			resources.ApplyResources(this.tbxMotLenght, "tbxMotLenght");
+			this.tbxMotLenght.Name = "tbxMotLenght";
+			this.tbxMotLenght.ReadOnly = true;
+			this.tbxMotLenght.Tag = "Falloff";
+			// 
+			// label9
+			// 
+			resources.ApplyResources(this.label9, "label9");
+			this.label9.Name = "label9";
 			// 
 			// chbxHasMotionMarks
 			// 
@@ -271,11 +313,6 @@ namespace OMF_Editor
 			this.tbxMotName.Tag = "MotionName";
 			this.tbxMotName.TextChanged += new System.EventHandler(this.TextBoxFilter);
 			this.tbxMotName.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.textBox1_PreviewKeyDown);
-			// 
-			// label2
-			// 
-			resources.ApplyResources(this.label2, "label2");
-			this.label2.Name = "label2";
 			// 
 			// btnMergeWith
 			// 
@@ -439,55 +476,20 @@ namespace OMF_Editor
 			this.boxStartMotionMark.TextChanged += new System.EventHandler(this.boxMotionMark_TextChanged);
 			this.boxStartMotionMark.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.textBox1_PreviewKeyDown);
 			// 
-			// label9
+			// linkLabel1
 			// 
-			resources.ApplyResources(this.label9, "label9");
-			this.label9.Name = "label9";
-			// 
-			// tbxMotLenght
-			// 
-			resources.ApplyResources(this.tbxMotLenght, "tbxMotLenght");
-			this.tbxMotLenght.Name = "tbxMotLenght";
-			this.tbxMotLenght.ReadOnly = true;
-			this.tbxMotLenght.Tag = "Falloff";
-			// 
-			// label10
-			// 
-			resources.ApplyResources(this.label10, "label10");
-			this.label10.Name = "label10";
-			// 
-			// radioButton1
-			// 
-			resources.ApplyResources(this.radioButton1, "radioButton1");
-			this.radioButton1.Checked = true;
-			this.radioButton1.Name = "radioButton1";
-			this.radioButton1.TabStop = true;
-			this.radioButton1.UseVisualStyleBackColor = true;
-			this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
-			// 
-			// radioButton2
-			// 
-			resources.ApplyResources(this.radioButton2, "radioButton2");
-			this.radioButton2.Name = "radioButton2";
-			this.radioButton2.UseVisualStyleBackColor = true;
-			this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
-			// 
-			// groupBox2
-			// 
-			this.groupBox2.Controls.Add(this.radioButton2);
-			this.groupBox2.Controls.Add(this.label10);
-			this.groupBox2.Controls.Add(this.radioButton1);
-			resources.ApplyResources(this.groupBox2, "groupBox2");
-			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.TabStop = false;
+			resources.ApplyResources(this.linkLabel1, "linkLabel1");
+			this.linkLabel1.Name = "linkLabel1";
+			this.linkLabel1.TabStop = true;
+			this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
 			// 
 			// Form1
 			// 
 			resources.ApplyResources(this, "$this");
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.linkLabel1);
 			this.Controls.Add(this.groupMotomMarks);
 			this.Controls.Add(this.lbxMotions);
-			this.Controls.Add(this.label2);
 			this.Controls.Add(this.btnSaveAs);
 			this.Controls.Add(this.btnTryRepair);
 			this.Controls.Add(this.btnAddAnimsFrom);
@@ -502,11 +504,11 @@ namespace OMF_Editor
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
+			this.groupBox2.ResumeLayout(false);
+			this.groupBox2.PerformLayout();
 			this.contextMenuStrip1.ResumeLayout(false);
 			this.groupMotomMarks.ResumeLayout(false);
 			this.groupMotomMarks.PerformLayout();
-			this.groupBox2.ResumeLayout(false);
-			this.groupBox2.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -529,7 +531,6 @@ namespace OMF_Editor
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox tbxMotSpeed;
         private System.Windows.Forms.TextBox tbxMotName;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnMergeWith;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
@@ -565,6 +566,7 @@ namespace OMF_Editor
 		private System.Windows.Forms.RadioButton radioButton1;
 		private System.Windows.Forms.TextBox tbxMotLenght;
 		private System.Windows.Forms.Label label9;
+		private System.Windows.Forms.LinkLabel linkLabel1;
 	}
 }
 
