@@ -8,9 +8,10 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>OMF_Editor</RootNamespace>
     <AssemblyName>OMF_Editor</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>OMF tool.ico</ApplicationIcon>

@@ -24,15 +24,6 @@ namespace OMF_Editor
         BindingSource bs = new BindingSource();
 
         string number_mask = "";
-
-        //int StopAtEnd = 1 << 1;
-        //int NoMix = 1 << 2;
-        //int SyncPart = 1 << 3;
-        //int UseFootSteps = 1 << 4;
-        //int MoveXForm = 1 << 5;
-        //int Idle = 1 << 6;
-        //int UseWeaponBone = 1 << 7;
-
         bool bKeyIsDown = false;
         bool bTextBoxEnabled = false;
         bool bMotMarkPanel = false;
@@ -680,5 +671,20 @@ namespace OMF_Editor
             // Navigate to a URL.
             System.Diagnostics.Process.Start("https://github.com/mortany/omf_editor");
         }
-	}
+
+        private void KeyDownFilter(object sender, KeyEventArgs e)
+        {
+
+            bool isMotionName = (!char.IsLetterOrDigit((char)e.KeyData) && (e.KeyValue != 189 && e.Shift)) || e.KeyValue != 52 && e.Shift;
+
+            bool isMotionParam = !char.IsDigit((char)e.KeyData) || e.Shift;
+
+            bool result = (sender as TextBox).Tag.ToString() == "MotionName" ? isMotionName : isMotionParam;
+
+            if(result && e.KeyData != Keys.Back)
+            {
+                e.SuppressKeyPress = true;
+            }
+        }
+    }
 }

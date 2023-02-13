@@ -243,6 +243,8 @@ namespace OMF_Editor
             OGF_V = reader.ReadInt16();
             Count = reader.ReadInt16();
 
+            bool empty_bone_names = false;
+
             for (int i = 0; i < Count; i++)
             {
                 BoneParts bonesparts = new BoneParts
@@ -251,13 +253,26 @@ namespace OMF_Editor
                     Count = reader.ReadInt16()
                 };
 
+                
+
                 for (int n = 0; n < bonesparts.Count; n++)
                 {
-                    BoneVector sbone = new BoneVector
+                    BoneVector sbone = new BoneVector();
+
+                    if(!empty_bone_names)
+                        sbone.Name = editor.ReadSuperString(reader);
+                    else
+                        sbone.Name = "";
+
+                    if(sbone.Name == "" && !empty_bone_names) 
                     {
-                        Name = editor.ReadSuperString(reader),
-                        ID = reader.ReadUInt32()
-                    };
+                        reader.BaseStream.Position -= 1;
+                        empty_bone_names = true;
+                    }
+
+                    
+                    sbone.ID = reader.ReadUInt32();
+
                     bonesparts.bones.Add(sbone);
                 }
 
